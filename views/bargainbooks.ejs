@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+  <head>
+    <title><%=shopData.shopName%>: Bargain Book</title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <h1><%=shopData.shopName%>: Add Book</h1>
+    <h2>Books priced under £20</h2>
+    <% if (cheapBooks.length > 0) { %>
+        <ul>
+          <% cheapBooks.forEach(function(book) { %>
+            <li><%= book.name %>, £<%= Number(book.price).toFixed(2) %></li>
+          <% }) %>
+        </ul>
+      <% } else { %>
+        <p>No bargain books found.</p>
+      <% } %>
+  </body>
+</html>
