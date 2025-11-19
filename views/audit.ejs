@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Welcome to <%=shopData.shopName%></title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <h1>Login Audit</h1>
+    <table>
+        <tr>
+          <th>Timestamp</th>
+          <th>Username</th>
+          <th>Success</th>
+          <th>IP Address</th>
+        </tr>
+
+        <% auditRecords.forEach(function(record){ %>
+        <tr>
+          <td><%= new Date(record.login_time).toLocaleString() %></td> 
+          <td><%= record.username %></td>
+          <td style="color: <%= record.success ? 'green' : 'red' %>;">
+              <%= record.success ? 'SUCCESS' : 'FAILURE' %>
+          </td>
+          <td><%= record.ip_address %></td>
+        </tr>
+        <% }); %>
+      </table>
+  </body>
+</html>
