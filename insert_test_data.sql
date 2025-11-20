@@ -12,6 +12,6 @@ VALUES
 -- Seed default login user for marking:
 -- username: gold
 -- password: smiths
-INSERT INTO users (username, firstName, lastName, email, hashedPassword)
+INSERT INTO users (username, first_name, last_name, email, hashedPassword)
 VALUES
   ('gold', 'Gold', 'User', 'gold@example.com', '$2b$10$dvmafyM293LjS1.Dh88Am.V0UZCRXcTfqh1i7vs0Xv/jakVYzt//a');
