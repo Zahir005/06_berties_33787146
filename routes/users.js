@@ -5,7 +5,16 @@ const router = express.Router();
 
 // bcrypt for hashing passwords
 const bcrypt = require("bcrypt");
+const { check, validationResult } = require('express-validator');
 const saltRounds = 10;
+
+const redirectLogin = (req, res, next) => {
+    if (!req.session.userId ) {
+      res.redirect('../users/login') // redirect to the login page
+    } else { 
+        next (); // move to the next middleware function
+    } 
+}
 
 // Show registration form
 router.get("/register", function (req, res) {
@@ -16,6 +25,7 @@ router.get("/register", function (req, res) {
 router.get("/login", function (req, res) {
     res.render("login.ejs");
 });
+
 
 
 // List all users
@@ -32,9 +42,43 @@ router.get('/listusers', function(req, res, next) {
 });
 
 // Handle registration form
-router.post("/registered", function (req, res, next) {
-
+router.post('/registered', 
+    [
+        // Email must be valid
+        check('email')
+          .isEmail()
+          .withMessage('Please enter a valid email address.'),
+      
+        // Username length
+        check('username')
+          .isLength({ min: 5, max: 20 })
+          .withMessage('Username must be between 5 and 20 characters long.'),
+      
+        // Password must be at least 8 chars
+        check('password')
+          .isLength({ min: 8 })
+          .withMessage('Password must be at least 8 characters long.'),
+      
+        // First name and last name should not be empty
+        check('first')
+          .notEmpty()
+          .withMessage('First name is required.'),
+        check('last')
+          .notEmpty()
+          .withMessage('Last name is required.')
+      ],
+      
+                function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.render('register.ejs', { errors: errors.array() });
+    }
+    else{
     // Task 11 will use req.body.password + hashedPassword
+    const username = req.sanitize(req.body.username);
+    const first = req.sanitize(req.body.first);
+    const last = req.sanitize(req.body.last);
+    const email = req.santize(req.body.email);
     const plainPassword = req.body.password;
 
     // Hash the password
@@ -48,7 +92,7 @@ router.post("/registered", function (req, res, next) {
         // ============================
         // Insert into the "users" table
         let sqlquery = "INSERT INTO users (username, firstName, lastName, email, hashedPassword) VALUES (?,?,?,?,?)";
-        let newrecord = [req.body.username, req.body.first, req.body.last, req.body.email, hashedPassword];
+        let newrecord = [username, first, last, email, hashedPassword];
 
         db.query(sqlquery, newrecord, (err, result) => {
             if (err) {
@@ -68,7 +112,8 @@ router.post("/registered", function (req, res, next) {
         });
 
     });
-});
+}});
+
 
 //audit log
 function logAudit(username, success, req) {
@@ -117,6 +162,7 @@ router.post("/loggedin", function (req, res, next) {
 
             if (match === true) {
                 // Successful login
+                req.session.userId = req.body.username;
                 logAudit(username, true, req);
                 res.send("Hello " + user.firstName + ", you have successfully logged in!");
             } else {
@@ -142,7 +188,8 @@ router.get('/audit', function(req, res, next) {
 
 // ===== Task 13: /users/list route – show all users (no passwords) =====
 
-router.get("/list", function (req, res, next) {
+router.get("/list",redirectLogin, function (req, res, next) {
+
     // only select non-sensitive fields
     const sqlquery = "SELECT username, firstName, lastName, email FROM users";
 
