@@ -29,8 +29,3 @@ CREATE TABLE IF NOT EXISTS login_audits (
     ip_address VARCHAR(45),
     PRIMARY KEY (id)
 );
-
-# Create the application user
-CREATE USER IF NOT EXISTS 'berties_books_app'@'localhost' IDENTIFIED BY 'qwertyuiop'; 
-GRANT ALL PRIVILEGES ON berties_books.* TO ' berties_books_app'@'localhost';
-
