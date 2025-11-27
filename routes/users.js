@@ -131,47 +131,65 @@ function logAudit(username, success, req) {
 
 
 // === Task 16: /users/loggedin – check username + password ===
-router.post("/loggedin", function (req, res, next) {
-    const username = req.body.username;
-    const password = req.body.password;
+router.post("/loggedin", 
+    [
+        check('username')
+            .notEmpty()
+            .withMessage("Username is required."),
+        check('password')
+            .notEmpty()
+            .withMessage("Password is required.")
+    ],
+    function (req, res, next) {
 
-    // 1. Get the stored hashed password for this user
-    const sqlquery = "SELECT username, firstName, hashedPassword FROM users WHERE username = ?";
+        const errors = validationResult(req);
 
-    db.query(sqlquery, [username], (err, result) => {
-        if (err) {
-            return next(err);
-            logAudit(username, false, req);
+        if (!errors.isEmpty()) {
+            return res.render('login.ejs');
         }
+        else {
 
-        if (result.length === 0) {
-            // No such user
-            logAudit(username, false, req);
-            return res.send("Login failed: incorrect username or password.");
+            const username = req.sanitize(req.body.username);
+            const password = req.body.password;
+
+            // 1. Get the stored hashed password for this user
+            const sqlquery = "SELECT password_hash FROM users WHERE username = ?";
+
+            db.query(sqlquery, [username], (err, result) => {
+                if (err) {
+                    return next(err);
+                    logAudit(username, false, req);
+                }
+
+                if (result.length === 0) {
+                    // No such user
+                    logAudit(username, false, req);
+                    return res.send("Login failed: incorrect username or password.");
+                }
+
+                const user = result[0];
+                const hashedPassword = user.password_hash;
+
+                // 2. Compare the password from the form with the hashed password from DB
+                bcrypt.compare(password, hashedPassword, function (err, match) {
+                    if (err) {
+                        return next(err);
+                        logAudit(username, false, req);
+                    }
+
+                    if (match === true) {
+                        // Successful login
+                        req.session.userId = username;
+                        logAudit(username, true, req);
+                        res.send("Hello " + user.firstName + ", you have successfully logged in!");
+                    } else {
+                        // Wrong password
+                        res.send("Login failed: incorrect username or password.");
+                        logAudit(username, false, req);
+                    }
+                });
+            });
         }
-
-        const user = result[0];
-        const hashedPassword = user.hashedPassword;
-
-        // 2. Compare the password from the form with the hashed password from DB
-        bcrypt.compare(password, hashedPassword, function (err, match) {
-            if (err) {
-                return next(err);
-                logAudit(username, false, req);
-            }
-
-            if (match === true) {
-                // Successful login
-                req.session.userId = req.body.username;
-                logAudit(username, true, req);
-                res.send("Hello " + user.firstName + ", you have successfully logged in!");
-            } else {
-                // Wrong password
-                res.send("Login failed: incorrect username or password.");
-                logAudit(username, false, req);
-            }
-        });
-    });
 });
 
 router.get('/audit', function(req, res, next) {
