@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+    <title>Weather forecast</title>
+    <link rel="stylesheet" type="text/css" href="/main.css" />
+
+    <!-- Extra styling for a nicer layout (Task 16) -->
+    <style>
+        .weather-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1.5rem 2rem;
+            border-radius: 10px;
+            background: #222;
+            color: #f5f5f5;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 1.05rem;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        .weather-container h1 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 2rem;
+            color: #4fc3f7;
+        }
+        .weather-form {
+            margin-bottom: 1.2rem;
+        }
+        .weather-form label {
+            margin-right: 0.4rem;
+        }
+        .weather-form input[type="text"] {
+            padding: 0.4rem 0.6rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #111;
+            color: #f5f5f5;
+        }
+        .weather-form button {
+            padding: 0.45rem 0.9rem;
+            font-size: 1rem;
+            margin-left: 0.4rem;
+            cursor: pointer;
+            border-radius: 4px;
+            border: none;
+            background: #4fc3f7;
+            color: #000;
+        }
+        .weather-details {
+            margin-top: 0.8rem;
+            line-height: 1.6;
+        }
+        .main-msg {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .error {
+            color: #ff8a80;
+            margin-top: 0.8rem;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1.4rem;
+            color: #81d4fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="weather-container">
+        <h1>Weather forecast</h1>
+        <p>Enter a city to see the current weather using the OpenWeatherMap API.</p>
+
+        <!-- Interactive form (Task 14, used for 15/16 too) -->
+        <form class="weather-form" method="GET" action="/weather">
+            <label for="city">City:</label>
+            <input
+                type="text"
+                id="city"
+                name="city"
+                value="<%= typeof city !== 'undefined' ? city : 'London' %>"
+                required
+            />
+            <button type="submit">Get weather</button>
+        </form>
+
+        <% if (typeof errorMsg !== "undefined" && errorMsg) { %>
+            <p class="error"><%= errorMsg %></p>
+        <% } else if (weather && weatherMessage) { %>
+            <!-- Extra weather info (Task 15) -->
+            <div class="weather-details">
+                <p class="main-msg"><strong><%= weatherMessage %></strong></p>
+                <p>Humidity: <%= weather.main.humidity %> %</p>
+                <p>Pressure: <%= weather.main.pressure %> hPa</p>
+                <p>Wind speed: <%= weather.wind.speed %> m/s</p>
+                <% if (weather.wind.deg) { %>
+                    <p>Wind direction: <%= weather.wind.deg %>°</p>
+                <% } %>
+                <p>Conditions: <%= weather.weather[0].description %></p>
+            </div>
+        <% } %>
+
+        <a href="/" class="back-link">Back to home</a>
+    </div>
+</body>
+</html>

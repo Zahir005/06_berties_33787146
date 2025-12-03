@@ -2,6 +2,9 @@
 const express = require("express")
 const router = express.Router()
 const { check, validationResult } = require('express-validator');
+const request = require("request");
+
+
 
 const redirectLogin = (req, res, next) => {
     if (!req.session.userId) {
@@ -20,6 +23,68 @@ router.get('/',function(req, res, next){
 router.get('/about',function(req, res, next){
     res.render('about.ejs')
 });
+
+// ===== Weather page =====
+router.get("/weather", function (req, res, next) {
+    let apiKey = "5f2edf135953a46409d8f89720fda141";
+
+    // ✅ Task 14: get city from query, default to London
+    let city = req.query.city || "London";
+
+    let url =
+        `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+
+        request(url, function (err, response, body) {
+            if (err) {
+                // network error
+                return res.render("weather.ejs", {
+                    weatherMessage: "",
+                    weather: null,
+                    city: city,
+                    errorMsg: "Unable to contact weather service."
+                });
+            }
+    
+            // ✅ your Task-17 snippet, adapted to render the page
+            let weather;
+    
+            try {
+                weather = JSON.parse(body);
+            } catch (e) {
+                // JSON couldn’t be parsed
+                return res.render("weather.ejs", {
+                    weatherMessage: "",
+                    weather: null,
+                    city: city,
+                    errorMsg: "No data found"
+                });
+            }
+    
+            if (weather !== undefined && weather.main !== undefined) {
+                var wmsg = 'It is ' + weather.main.temp +
+                    ' degrees in ' + weather.name +
+                    '! <br> The humidity now is: ' +
+                    weather.main.humidity;
+    
+                // instead of res.send(wmsg), show it on your EJS page
+                res.render("weather.ejs", {
+                    weatherMessage: wmsg,
+                    weather: weather,
+                    city: city,
+                    errorMsg: ""
+                });
+            } else {
+                // no usable data from API
+                res.render("weather.ejs", {
+                    weatherMessage: "",
+                    weather: null,
+                    city: city,
+                    errorMsg: "No data found"
+                });
+            }
+        });
+    });
+
 
 router.get('/logout', redirectLogin, (req, res) => {
     req.session.destroy(err => {

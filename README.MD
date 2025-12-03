@@ -234,3 +234,86 @@ To protect against Cross-Site Scripting (XSS) attacks, I used sanitisation funct
 - All visible user-input text fields (names, usernames, titles, search terms) are escaped.
 - Password and purely numeric inputs are not escaped (only normalised).
 - Static or read-only pages are left untouched for efficiency and clarity.
+
+## API Documentation
+This API provides machine-readable access to the books stored in the Berties Books database. 
+
+All endpoints return JSON and support optional filtering, sorting, and searching.
+```bash
+http://localhost:8000/api
+```
+
+### GET /api/books
+Returns a list of books from the database.
+```bash
+http://localhost:8000/api/books
+```
+Response:
+A JSON array of all books.
+
+### Search, Filter, and Sort Options
+You can add optional query parameters to control what results are returned.
+
+All parameters are optional and can be combined.
+
+#### Search by Name
+Search for books containing a specific word in their name.
+```bash
+/api/books?search=world
+```
+Description:
+Returns only books whose name contains “world”.
+
+#### Filter by Price Range
+Filter results by minimum and/or maximum price.
+
+Price Range
+```bash
+/api/books?minprice=5&max_price=10
+```
+
+#### Sort Results
+Sort results by name or price.
+
+Sort by name (A–Z):
+```bash
+/api/books?sort=name
+```
+
+Sort by price (low → high):
+```bash
+/api/books?sort=price
+```
+
+#### Combined Examples
+Search + filter + sort all work together.
+
+##### Example 1:
+Books with “world” in the name, priced between £5–£10:
+```bash 
+/api/books?search=world&minprice=5&max_price=10
+```
+
+##### Example 2:
+Books under £20 sorted by name:
+```bash
+/api/books?max_price=20&sort=name
+```
+
+##### Example 3:
+All books sorted by price:
+```bash
+/api/books?sort=price
+```
+
+### Error Handling
+If the database query fails, the API returns a JSON error object.
+Invalid or missing query parameters simply return all results or an empty list, the app will not crash.
+
+### Summary of Parameters
+| Parameter   | Description                        | Example         |
+| ----------- | ---------------------------------- | --------------- |
+| `search`    | Search by a word in the book name  | `?search=world` |
+| `minprice`  | Minimum price (inclusive)          | `?minprice=5`   |
+| `max_price` | Maximum price (inclusive)          | `?max_price=10` |
+| `sort`      | Sorting method (`name` or `price`) | `?sort=price`   |

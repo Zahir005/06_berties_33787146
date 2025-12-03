@@ -58,6 +58,9 @@ app.use('/', mainRoutes)
 const usersRoutes = require('./routes/users')
 app.use('/users', usersRoutes)
 
+// API routes
+const apiRoutes = require("./routes/api");
+app.use("/api", apiRoutes);
 
 
 // Load the route handlers for /books

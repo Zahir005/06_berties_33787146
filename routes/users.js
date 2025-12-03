@@ -78,7 +78,7 @@ router.post('/registered',
     const username = req.sanitize(req.body.username);
     const first = req.sanitize(req.body.first);
     const last = req.sanitize(req.body.last);
-    const email = req.santize(req.body.email);
+    const email = req.sanitize(req.body.email);
     const plainPassword = req.body.password;
 
     // Hash the password
@@ -91,7 +91,7 @@ router.post('/registered',
         // TASK 10 — STORE IN DATABASE
         // ============================
         // Insert into the "users" table
-        let sqlquery = "INSERT INTO users (username, firstName, lastName, email, hashedPassword) VALUES (?,?,?,?,?)";
+        let sqlquery = "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?,?,?,?,?)";
         let newrecord = [username, first, last, email, hashedPassword];
 
         db.query(sqlquery, newrecord, (err, result) => {
@@ -153,7 +153,7 @@ router.post("/loggedin",
             const password = req.body.password;
 
             // 1. Get the stored hashed password for this user
-            const sqlquery = "SELECT password_hash FROM users WHERE username = ?";
+            const sqlquery = "SELECT hashedPassword FROM users WHERE username = ?";
 
             db.query(sqlquery, [username], (err, result) => {
                 if (err) {
@@ -168,7 +168,7 @@ router.post("/loggedin",
                 }
 
                 const user = result[0];
-                const hashedPassword = user.password_hash;
+                const hashedPassword = user.hashedPassword;
 
                 // 2. Compare the password from the form with the hashed password from DB
                 bcrypt.compare(password, hashedPassword, function (err, match) {
@@ -209,7 +209,7 @@ router.get('/audit', function(req, res, next) {
 router.get("/list",redirectLogin, function (req, res, next) {
 
     // only select non-sensitive fields
-    const sqlquery = "SELECT username, firstName, lastName, email FROM users";
+    const sqlquery = "SELECT username, firstname, lastname, email FROM users";
 
     db.query(sqlquery, (err, result) => {
         if (err) {
