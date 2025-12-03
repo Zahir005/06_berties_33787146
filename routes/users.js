@@ -168,7 +168,7 @@ router.post("/loggedin",
                 }
 
                 const user = result[0];
-                const hashedPassword = user.hashedPassword;
+                const hashedPassword = user.password_hash;
 
                 // 2. Compare the password from the form with the hashed password from DB
                 bcrypt.compare(password, hashedPassword, function (err, match) {
