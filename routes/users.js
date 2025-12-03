@@ -91,7 +91,7 @@ router.post('/registered',
         // TASK 10 — STORE IN DATABASE
         // ============================
         // Insert into the "users" table
-        let sqlquery = "INSERT INTO users (username, firstname, lastname, email, hashedPassword) VALUES (?,?,?,?,?)";
+        let sqlquery = "INSERT INTO users (username, firstname, lastname, email, password_hash) VALUES (?,?,?,?,?)";
         let newrecord = [username, first, last, email, hashedPassword];
 
         db.query(sqlquery, newrecord, (err, result) => {
@@ -153,7 +153,7 @@ router.post("/loggedin",
             const password = req.body.password;
 
             // 1. Get the stored hashed password for this user
-            const sqlquery = "SELECT hashedPassword FROM users WHERE username = ?";
+            const sqlquery = "SELECT password_hash FROM users WHERE username = ?";
 
             db.query(sqlquery, [username], (err, result) => {
                 if (err) {
